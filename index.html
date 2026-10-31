@@ -496,9 +496,59 @@ const neck=new T.Mesh(new T.CylinderGeometry(.045,.05,.12,10),skin);neck.positio
 const head=new T.Group();head.position.y=.56;body.add(head);const sk=new T.Mesh(new T.SphereGeometry(.105,16,12),skin);sk.scale.set(1,1.2,1.05);sk.position.y=.1;head.add(sk);
 const face=new T.Mesh(new T.SphereGeometry(.108,20,14,PI/2-.95,1.9,PI*.2,PI*.62),new T.MeshLambertMaterial({map:TX.face,emissiveMap:TX.faceE,emissive:0xffffff,emissiveIntensity:.9}));face.scale.set(1,1.2,1.05);face.position.y=.1;head.add(face);
 const eyes=[];for(const s of[-1,1]){const e=new T.Sprite(new T.SpriteMaterial({map:TX.glow,color:0xffffff,blending:T.AdditiveBlending,transparent:true,depthWrite:false}));e.scale.set(.07,.05,1);e.position.set(s*.036,.13,.115);head.add(e);eyes.push(e)}
-const cap=new T.Mesh(new T.SphereGeometry(.118,14,10,0,PI*2,0,PI*.55),L(0x080605));cap.scale.set(1,1.2,1.08);cap.rotation.x=-.35;cap.position.set(0,.11,-.01);head.add(cap);
-const hm=new T.MeshLambertMaterial({color:0x0e0b09,map:TX.hair,transparent:true,alphaTest:.25,side:T.DoubleSide}),strands=[];
-for(let i=0;i<34;i++){let a=PI*.42+i/33*PI*1.16;const len=.5+rnd()*.4,g=new T.PlaneGeometry(.07+rnd()*.05,len);g.translate(0,-len/2,0);const m=new T.Mesh(g,hm);const piv=new T.Group();piv.position.set(Math.sin(a)*.1,.2,Math.cos(a)*.1);piv.rotation.y=a;piv.add(m);m.rotation.x=.12;head.add(piv);strands.push(piv)}
+const hairMat=L(0x0a0706);
+const cap=new T.Mesh(new T.SphereGeometry(.122,18,14,0,PI*2,0,PI*.65),hairMat);
+cap.scale.set(1.02,1.22,1.08);cap.rotation.x=-.18;cap.position.set(0,.12,-.015);head.add(cap);
+
+/* Front neat hair frames (curving around temples to behind ears) */
+for(const s of[-1,1]){
+  const sideH=new T.Mesh(new T.CylinderGeometry(.022,.035,.15,10),hairMat);
+  sideH.position.set(s*.098,.12,.02);sideH.rotation.z=s*-.28;sideH.rotation.x=.15;head.add(sideH);
+}
+
+/* Hair tie / Gajra at root of the braid */
+const gajra=new T.Mesh(new T.TorusGeometry(.045,.015,8,16),new T.MeshLambertMaterial({color:0xf5efe0,emissive:0x332818}));
+gajra.position.set(0,.05,-.115);gajra.rotation.x=PI*.4;head.add(gajra);
+
+/* Indian Braided Choti (thick interwoven segments tapering down the back) */
+const strands=[];
+const chotiGroup=new T.Group();
+chotiGroup.position.set(0,.04,-.115);
+head.add(chotiGroup);
+
+let parentSeg=chotiGroup;
+const segCount=10;
+for(let i=0;i<segCount;i++){
+  const t=i/segCount;
+  const seg=new T.Group();
+  seg.position.set(0, i===0?0:-0.052, 0);
+  
+  /* Interlaced weave oval beads */
+  const rTuck=0.034*(1-t*0.52);
+  const beadL=new T.Mesh(new T.SphereGeometry(rTuck,10,8),hairMat);
+  beadL.scale.set(1.18,.75,1.0);
+  beadL.position.set((i%2===0?0.012:-0.012),-.025,-.003);
+  beadL.rotation.z=(i%2===0?.35:-.35);
+  seg.add(beadL);
+  
+  const beadR=new T.Mesh(new T.SphereGeometry(rTuck*.92,10,8),hairMat);
+  beadR.scale.set(1.15,.72,.95);
+  beadR.position.set((i%2===0?-0.01:0.01),-.032,.004);
+  beadR.rotation.z=(i%2===0?-.3:.3);
+  seg.add(beadR);
+  
+  /* Traditional red / gold Parandi tassel at bottom */
+  if(i===segCount-1){
+    const parandiTie=new T.Mesh(new T.CylinderGeometry(.015,.014,.025,8),new T.MeshLambertMaterial({color:0xd41c1c,emissive:0x330505}));
+    parandiTie.position.set(0,-.055,0);seg.add(parandiTie);
+    const tassel=new T.Mesh(new T.ConeGeometry(.022,.07,8),new T.MeshLambertMaterial({color:0xba1414,emissive:0x220202}));
+    tassel.position.set(0,-.09,0);tassel.rotation.x=PI;seg.add(tassel);
+  }
+  
+  parentSeg.add(seg);
+  strands.push(seg);
+  parentSeg=seg;
+}
 const arm=(s)=>{const a=new T.Group();a.position.set(s*.19,.4,0);body.add(a);const sl=new T.Mesh(new T.CylinderGeometry(.05,.045,.11,10),red);sl.position.y=-.05;a.add(sl);const u=new T.Mesh(new T.CylinderGeometry(.038,.033,.28,8),skin);u.position.y=-.14;a.add(u);
 const f=new T.Group();f.position.y=-.28;a.add(f);const fo=new T.Mesh(new T.CylinderGeometry(.032,.026,.26,8),skin);fo.position.y=-.13;f.add(fo);for(let i=0;i<4;i++){const b=new T.Mesh(new T.TorusGeometry(.034,.007,5,14),L(i%2?0xc89a30:0xa00a0a,null,{emissive:i%2?0x302000:0x200000}));b.rotation.x=PI/2;b.position.y=-.17-i*.016;f.add(b)}
 const hd=new T.Mesh(BG,skin);hd.scale.set(.05,.09,.035);hd.position.y=-.3;f.add(hd);for(let i=0;i<4;i++){const fi=new T.Mesh(BG,skin);fi.scale.set(.008,.07,.008);fi.position.set(-.018+i*.012,-.37,.01);fi.rotation.x=.3;f.add(fi)}return[a,f]};
@@ -547,7 +597,7 @@ GM.feet[0].position.z=.14+(a=='idle'?0:s*.1);GM.feet[1].position.z=.14-(a=='idle
 GM.head.rotation.set(-lean*.6,Math.sin(G.ph*.3)*.2,Math.sin(G.ph*.37)*.22+(a=='idle'?.25:0)+(rnd()<.02?.35:0));
 if(a=='attack'){const k=1-G.atk/.55;GM.armR.rotation.x=k<.45?-2.9*(k/.45):-2.9+(k-.45)/.55*3.5;GM.armL.rotation.x=-1.2;GM.body.rotation.x=.3}
 if(a=='stun'){GM.body.rotation.x=-.3;GM.armL.rotation.x=-2.3;GM.armR.rotation.x=-2.1;GM.foreL.rotation.x=-1.4;GM.foreR.rotation.x=-1.4;GM.head.rotation.z=Math.sin(G.ph*20)*.2}
-GM.strands.forEach((p,i)=>{p.children[0].rotation.x=.12+(a=='run'?.5:0)*(Math.cos(p.rotation.y)<0?1:.2)+Math.sin(G.ph*.8+i)*.06});GM.pb.rotation.x=.12+(a=='run'?.5:0)}
+GM.strands.forEach((seg,i)=>{const swX=.08*(i+1)/10+(a=='run'?.12:0)*Math.sin(G.ph*4+i*.4);const swZ=Math.sin(G.ph*2+i*.3)*.06;seg.rotation.x=swX;seg.rotation.z=swZ});GM.pb.rotation.x=.12+(a=='run'?.5:0)}
 /* ================= PLAYER ================= */
 const P={x:12,z:21.5,crouch:false,run:false,hidden:null,hideSeen:false,stam:100,light:true,bob:0,stepT:0};let yaw=0,pitch=0,keys={},mv={x:0,y:0},look={x:0,y:0};
 function hit(x,z){const r=.3;for(const s of solids){if(s.door&&s.door.open)continue;if(x+r>s.x1&&x-r<s.x2&&z+r>s.z1&&z-r<s.z2)return true}return false}
